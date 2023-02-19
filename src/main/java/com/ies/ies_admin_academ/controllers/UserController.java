@@ -6,7 +6,7 @@ package com.ies.ies_admin_academ.controllers;
 * */
 
 import com.ies.ies_admin_academ.config.Routes;
-import com.ies.ies_admin_academ.model.entities.uf_sisinfo_permisibilidad;
+import com.ies.ies_admin_academ.model.entities.uf_sisinfo_userapps;
 import com.ies.ies_admin_academ.model.entities.uf_userprofile;
 import com.ies.ies_admin_academ.services.UserServiceGeneral;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -57,7 +56,7 @@ public class UserController {
     }
 
     @GetMapping(Routes.IES_USERS_SYSINFO_PERMISSIONS)
-    public List<uf_sisinfo_permisibilidad> user_getapps_permissions(
+    public List<uf_sisinfo_userapps> user_getapps_permissions(
             @PathVariable("data") String data){
             //Decode user and password
             String[] param = dataDecoder(data);

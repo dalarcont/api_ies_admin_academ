@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.ies</groupId>
 	<artifactId>ies_admin_academ</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.2-SNAPSHOT</version>
 	<name>ies_admin_academ</name>
 	<description>API REST For IES Admin and Academ Services</description>
 	<properties>

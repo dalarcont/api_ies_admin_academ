@@ -7,7 +7,7 @@ package com.ies.ies_admin_academ.services;
 import com.ies.ies_admin_academ.config.ErrorCodes;
 import com.ies.ies_admin_academ.exceptions.BusinessException;
 import com.ies.ies_admin_academ.model.entities.uf_portallaboral;
-import com.ies.ies_admin_academ.model.entities.uf_sisinfo_permisibilidad;
+import com.ies.ies_admin_academ.model.entities.uf_sisinfo_userapps;
 import com.ies.ies_admin_academ.model.entities.uf_userprofile;
 import com.ies.ies_admin_academ.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,8 +96,8 @@ public class UserServiceGeneral {
      * @param usr
      * @return Object to give app permissions of an user
      */
-    public List<uf_sisinfo_permisibilidad> user_getapps_permissions(String usr){
-        List<uf_sisinfo_permisibilidad> resultTemp = userRepository.getApps_permissions(usr);
+    public List<uf_sisinfo_userapps> user_getapps_permissions(String usr){
+        List<uf_sisinfo_userapps> resultTemp = userRepository.getApps_permissions(usr);
 
         if(validateUsername(usr)){
             //User exists

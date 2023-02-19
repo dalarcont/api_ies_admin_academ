@@ -7,7 +7,7 @@ package com.ies.ies_admin_academ.repositories;
 
 import com.ies.ies_admin_academ.model.entities.*;
 import com.ies.ies_admin_academ.model.mappers.UserValidationDESKAPP_Mapper;
-import com.ies.ies_admin_academ.model.mappers.uf_sisinfo_permisibilidad_Mapper;
+import com.ies.ies_admin_academ.model.mappers.uf_sisinfo_userapps_Mapper;
 import com.ies.ies_admin_academ.model.mappers.userProfile_Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -44,9 +44,25 @@ public class UserRepository {
     }
 
     //SINGULAR SERVICE TO GET ROWS FROM DB THAT CONTAINS APP PERMISSIONS ON SYSINFO
-    public List<uf_sisinfo_permisibilidad> getApps_permissions(String username){
+    public List<uf_sisinfo_userapps> getApps_permissions(String username){
         return dao_template.query(
-                "SELECT * FROM uf_sisinfo_permisibilidad WHERE nickname = ?", new uf_sisinfo_permisibilidad_Mapper(), username
+                "SELECT \n" +
+                        "null AS NICKNAME,\n" +
+                        "sia.APPCODE,\n" +
+                        "1 AS PERMISSION,\n" +
+                        "sia.APPNAME,\n" +
+                        "sia.APPDESCRIPTION,\n" +
+                        "sia.TREELEVEL\n" +
+                        "FROM\n" +
+                        "uf_sisinfo_apps sia WHERE sia.APPDESCRIPTION IN('')\n" +
+                        "UNION\n" +
+                        "SELECT \n" +
+                        "sip.*,\n" +
+                        "sia2.APPNAME,\n" +
+                        "sia2.APPDESCRIPTION,\n" +
+                        "sia2.TREELEVEL\n" +
+                        "FROM uf_sisinfo_permisibilidad sip, uf_sisinfo_apps sia2\n" +
+                        "WHERE sip.NICKNAME = ? AND sip.PERMISSION = 1 AND sia2.APPCODE = sip.APPCODE;", new uf_sisinfo_userapps_Mapper(), username
         );
     }
 
@@ -81,7 +97,6 @@ public class UserRepository {
         }else{
             r = false;
         }
-
         return r;
     }
 

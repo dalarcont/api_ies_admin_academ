@@ -98,4 +98,8 @@ Colombia
 - ### VERSION 0.0.1-SNAPSHOT
   #### Service User:
   GET [EXISTENCE; MATCH; SYSINFOACCESS; SYSINFOPERMISSIONS; PROFILEDATA; RECORDACCESS]
+- ### VERSION 0.0.2-SNAPSHOT
+  #### Service User:
+  GET [EXISTENCE; MATCH; SYSINFOACCESS; SYSINFOPERMISSIONS; PROFILEDATA; RECORDACCESS]
+    - Correction on query designed to get user's apps permissions and its data, now it gets apps allowed to the user and app's info package.  
 
