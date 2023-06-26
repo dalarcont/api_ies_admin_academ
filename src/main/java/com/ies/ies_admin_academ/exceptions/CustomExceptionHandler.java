@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 /*
- * File for custom handle exceptions related to Unimisera's business logic
+ * File for custom handle exceptions related to IES Admin Academ business logic
  * */
 @ControllerAdvice
 public class CustomExceptionHandler {

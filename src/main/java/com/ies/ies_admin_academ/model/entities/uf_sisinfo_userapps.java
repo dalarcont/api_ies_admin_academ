@@ -2,31 +2,31 @@ package com.ies.ies_admin_academ.model.entities;
 
 public class uf_sisinfo_userapps {
 
-    private String user;
+    private String username;
     private String appcode;
     private boolean permission;
     private String appname;
-    private String appdescr;
+    private String appdescription;
     private int treelevel;
 
     public uf_sisinfo_userapps() {
     }
 
     public uf_sisinfo_userapps(String user, String appcode, boolean permission, String appname, String appdescr, int treelevel) {
-        this.user = user;
+        this.username = user;
         this.appcode = appcode;
         this.permission = permission;
         this.appname = appname;
-        this.appdescr = appdescr;
+        this.appdescription = appdescr;
         this.treelevel = treelevel;
     }
 
-    public String getUser() {
-        return user;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUser(String user) {
-        this.user = user;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getAppcode() {
@@ -53,12 +53,12 @@ public class uf_sisinfo_userapps {
         this.appname = appname;
     }
 
-    public String getAppdescr() {
-        return appdescr;
+    public String getAppdescription() {
+        return appdescription;
     }
 
-    public void setAppdescr(String appdescr) {
-        this.appdescr = appdescr;
+    public void setAppdescription(String appdescription) {
+        this.appdescription = appdescription;
     }
 
     public int getTreelevel() {

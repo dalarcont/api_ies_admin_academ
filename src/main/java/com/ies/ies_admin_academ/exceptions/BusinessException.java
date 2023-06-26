@@ -4,7 +4,7 @@ package com.ies.ies_admin_academ.exceptions;
 import com.ies.ies_admin_academ.config.ErrorCodes;
 
 /*
-* File for handle exceptions related to Unimisera's business logic
+* File for handle exceptions related to IES Admin Academ business logic
 * */
 public class BusinessException extends RuntimeException{
 

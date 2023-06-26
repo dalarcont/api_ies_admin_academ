@@ -5,85 +5,136 @@ package com.ies.ies_admin_academ.controllers;
 *
 * */
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.github.fge.jsonpatch.JsonPatch;
+import com.github.fge.jsonpatch.JsonPatchException;
 import com.ies.ies_admin_academ.config.Routes;
-import com.ies.ies_admin_academ.model.entities.uf_sisinfo_userapps;
-import com.ies.ies_admin_academ.model.entities.uf_userprofile;
+import com.ies.ies_admin_academ.model.entities.*;
 import com.ies.ies_admin_academ.services.UserServiceGeneral;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.List;
 
 @RestController
-@RequestMapping(Routes.IES_USERS)
+@RequestMapping(Routes.ROOT.USERS)
 public class UserController {
 
-    String[] dataDecoder(String cad){
+    private final UserServiceGeneral userServiceGeneral;
+    public UserController(UserServiceGeneral userServiceGeneral) {
+        this.userServiceGeneral = userServiceGeneral;
+    }
+
+    /**
+     * Receives encoded credentials of a user from the frontEnd and convert to use it as normal string content.
+     * @param cad   Encoded credentials as one single string
+     * @return String[] with decoded credentials 0 = username ; 1 = password
+     */
+    public String[] dataDecoder(String cad){
         //Decode data
         String[] d  = cad.split("!");
-        byte[] bA = Base64.getDecoder().decode(d[0]);
-        byte[] bB = Base64.getDecoder().decode(d[1]);
-        return new String[] {new String(bA), new String(bB)};
+        String a = new String(Base64.getDecoder().decode(d[0]));
+        String b = new String(Base64.getDecoder().decode(d[1]));
+        return new String[] {a,b};
     }
-    @Autowired
-    private UserServiceGeneral userServiceGeneral;
 
-    @GetMapping(Routes.IES_USERS_EXISTENCEPROOF)
-    public boolean user_validate_existence(
+
+    @GetMapping(Routes.GET.USERS.EXISTENCEPROOF)
+    public boolean userValidateExistence(
             @PathVariable("username") String username){
-            return userServiceGeneral.validateUsername(username);
+            return userServiceGeneral.validateUser(username);
     }
 
-    @GetMapping(Routes.IES_USERS_PWD_VALIDATION)
-    public boolean user_validate_pwd(
+    @GetMapping(Routes.GET.USERS.GET_USER_PROFILE)
+    public uf_user_profile userGetProfileData(
+    //public List<uf_user_profile> userGetProfileData(
             @PathVariable("data") String data){
-            //Decode user and password
-            String[] param = dataDecoder(data);
-            //Perform service operation
-            return userServiceGeneral.validateAccess(param[0],param[1]);
+        //Perform endpoint consumption
+        return userServiceGeneral.getUserProfileData(data).get(0);
     }
 
-    @GetMapping(Routes.IES_USERS_DESKAPP_ACCESS)
-    public boolean user_validate_deskapp(
+    @GetMapping(Routes.GET.USERS.GET_EMPLOYEE_PROFILE)
+    public uf_employee_profile userGetEmployeeData(
+    //public List<uf_employee_profile> userGetEmployeeData(
             @PathVariable("data") String data){
-            //Decode user and password
-            String[] param = dataDecoder(data);
-            //Perform service operation
-            return userServiceGeneral.validateDeskappAccess(param[0],param[1]);
+        //Perform endpoint consumption
+        return userServiceGeneral.getEmployeeProfile(data).get(0);
     }
 
-    @GetMapping(Routes.IES_USERS_SYSINFO_PERMISSIONS)
-    public List<uf_sisinfo_userapps> user_getapps_permissions(
+    @GetMapping(Routes.GET.USERS.GET_STUDENT_PROFILE)
+    public uf_student_profile userGetStudentData(
             @PathVariable("data") String data){
-            //Decode user and password
-            String[] param = dataDecoder(data);
-            //Perform service operation
-            return userServiceGeneral.user_getapps_permissions(param[0]);
+        //Perform endpoint consumption
+        return userServiceGeneral.getStudentProfile(data).get(0);
     }
 
-    @GetMapping(Routes.IES_USERS_GETPROFILE)
-    public List<uf_userprofile> user_getProfileData(
+    @GetMapping(Routes.GET.USERS.MATCH_LOGIN)
+    public boolean matchLoginALL(
             @PathVariable("data") String data){
-            //Decode user and password
-            String[] param = dataDecoder(data);
-            //Perform service operation
-            return userServiceGeneral.getUserProfileData(param[0],param[1]);
+            //Perform endpoint consumption
+            return userServiceGeneral.validateLogin(dataDecoder(data)[0],dataDecoder(data)[1]);
+
     }
 
-    @GetMapping(Routes.IES_USERS_DESKAPP_RECORDACCESS)
-    public boolean user_newAccessRecord(
+    @GetMapping(Routes.GET.USERS.DESKAPP_ACCESS)
+    public boolean validateDeskappAccess(
             @PathVariable("data") String data){
-            //Decode user and password
-            String[] param = dataDecoder(data);
-            //new date data
-            String newDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime());
-            //Perform service operation
-            return userServiceGeneral.setUserLastAccessDeskapp(param[0], param[1], newDate);
+            //Perform endpoint consumption
+            return userServiceGeneral.validateDeskappAccess(data);
     }
 
+    @GetMapping(Routes.GET.USERS.STUDENT_ACCESS)
+    public boolean validateStudentAccess(
+            @PathVariable("data") String data){
+        //Perform endpoint consumption
+        return userServiceGeneral.validateStudentAccess(data);
+    }
+
+    @GetMapping(Routes.GET.USERS.SYSINFO_PERMISSIONS)
+    public List<uf_sisinfo_userapps> userGetAppsPermissions(
+            @PathVariable("data") String data){
+            //Perform endpoint consumption
+            return userServiceGeneral.userGetAppsPermissions(dataDecoder(data)[0]);
+    }
+
+    @PostMapping
+    public uf_user_profile userAddUser(@RequestBody uf_user_profile userdata){
+        //Perform endpoint consumption
+        return userServiceGeneral.addUser(userdata);
+    }
+
+    @PatchMapping(Routes.ROOT.BODY)
+    public uf_user_profile userPatchItem(
+            @PathVariable String data,
+            @RequestBody JsonPatch jsonPatch) throws JsonPatchException, JsonProcessingException {
+        //Decode user and password
+        return userServiceGeneral.patchUser(data,jsonPatch);
+
+    }
+
+    @GetMapping(Routes.GET.USERS.SYSTEM_DESKAPP_RECORDACCESS)
+    public boolean userNewAccessRecord(
+            @PathVariable("data") String data){
+        //new date data
+        String newDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime());
+        //Perform endpoint consumption
+        return userServiceGeneral.setUserLastAccessDeskapp(dataDecoder(data)[0], newDate);
+    }
+
+    @PutMapping(Routes.ROOT.BODY)
+    public uf_user_profile userPutProfile(
+            @PathVariable String data,
+            @RequestBody uf_user_profile userdata){
+        //Perform endpoint consumption
+        return userServiceGeneral.putUser(data,userdata);
+    }
+
+    @DeleteMapping(Routes.ROOT.BODY)
+    public boolean deleteUser(@PathVariable String data){
+        //Perform endpoint consumption
+        return userServiceGeneral.deleteUser(data);
+    }
 
 
 }
