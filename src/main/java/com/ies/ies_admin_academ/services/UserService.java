@@ -11,6 +11,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.ies.ies_admin_academ.config.ErrorCodes;
+import com.ies.ies_admin_academ.config.SimpleEmail;
+import com.ies.ies_admin_academ.config.EmailUtil;
 import com.ies.ies_admin_academ.exceptions.BusinessException;
 import com.ies.ies_admin_academ.model.entities.*;
 import com.ies.ies_admin_academ.repositories.UserRepository;
@@ -20,23 +22,27 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.util.*;
 
-@Service
-public class UserServiceGeneral {
 
-    Logger eventLogger = LogManager.getLogger(UserServiceGeneral.class);
+@Service
+public class UserService {
+
+    Logger eventLogger = LogManager.getLogger(UserService.class);
     private final UserRepository userRepository;
 
+    private SimpleEmail simpleEmail = new SimpleEmail();
     private final ObjectMapper objMapper;
-    public UserServiceGeneral(UserRepository userRepository, ObjectMapper objMapper) {
+    public UserService(UserRepository userRepository, ObjectMapper objMapper) {
         this.userRepository = userRepository;
         this.objMapper = objMapper;
     }
+
+
 
     /**
      * Validates if a user exists using its username, it doesn't matter the user role.
      * Provide validation to logins, existence before user addition or user actions related.
      * @param username -> Username target
-     * @return FALSE => Means that username doesn't exist so can add the user
+     * @return TRUE or FALSE
      */
     public boolean validateUser(String username){
         //This service doesn't have a log record because it's the root of all services, so It's useful to keep logging a record
@@ -47,10 +53,10 @@ public class UserServiceGeneral {
      * @param username Username target
      * @return uf_user_profile Object
      */
-    public List<uf_user_profile> getUserProfileData(String username){
+    public List<uf_personas> userGetProfileData(String username){
         eventLogger.log(org.apache.logging.log4j.Level.INFO, "-API\t--SERVICE\t---GET\t----USER PROFILE DATA\t-----@{}", username);
 
-        List<uf_user_profile> resultTemp;
+        List<uf_personas> resultTemp;
 
         if(validateUser(username)){
             //User exists
@@ -72,9 +78,9 @@ public class UserServiceGeneral {
      * @param username Username target
      * @return uf_employee_profile Object
      */
-    public List<uf_employee_profile> getEmployeeProfile(String username){
+    public List<uf_personas_empleado> getEmployeeProfile(String username){
         eventLogger.log(org.apache.logging.log4j.Level.INFO, "-API\t--SERVICE\t---GET\t----EMPLOYEE PROFILE DATA\t-----@{}", username);
-        List<uf_employee_profile> resultTemp;
+        List<uf_personas_empleado> resultTemp;
 
         if(validateUser(username)){
             //User exists
@@ -96,9 +102,9 @@ public class UserServiceGeneral {
      * @param username Username target
      * @return uf_employee_profile Object
      */
-    public List<uf_student_profile> getStudentProfile(String username){
+    public List<uf_personas_estudiante> getStudentProfile(String username){
         eventLogger.log(org.apache.logging.log4j.Level.INFO, "-API\t--SERVICE\t---GET\t----STUDENT PROFILE DATA\t-----@{}", username);
-        List<uf_student_profile> resultTemp;
+        List<uf_personas_estudiante> resultTemp;
 
         if(validateUser(username)){
             //User exists, but we don't know which category/group
@@ -116,7 +122,7 @@ public class UserServiceGeneral {
     }
 
     /**
-     * Service to validate the match between username and password to give access to an EMPLOYEE
+     * Service to validate the match between username and password to give access to system doesn't matter what environment
      * @param usr Username target
      * @param pwd Password associated to username target
      * @return TRUE OR FALSE
@@ -125,20 +131,22 @@ public class UserServiceGeneral {
         eventLogger.log(org.apache.logging.log4j.Level.INFO, "-API\t--SERVICE\t---GET\t----LOGIN ACCESS VALIDATION BY MATCH\t-----@{}", usr);
 
         if(validateUser(usr)){
-            String pwdEncrypted = getUserProfileData(usr).get(0).getPkeyusuario();
-            if(new BCryptPasswordEncoder().matches(pwd,pwdEncrypted)){
+            if(userRepository.matchLogin(usr,pwd)){
+                //Match!
                 return true;
             }else{
+                //Doesn't match
                 throw new BusinessException(ErrorCodes.USER_VALIDATION_USER_MISSMATCH);
             }
         }else{
             //User doesn't exists
             throw new BusinessException(ErrorCodes.USER_VALIDATION_USER_NOEXISTS);
         }
+
     }
 
     /**
-     * Service to validate a student have access to system-info
+     * Service to validate an employee have access to system-info
      * @param usr Username target
      * @return TRUE OR FALSE
      */
@@ -155,6 +163,37 @@ public class UserServiceGeneral {
             //User doesn't exists
             throw new BusinessException(ErrorCodes.USER_VALIDATION_USER_NOEXISTS);
         }
+    }
+
+    /**
+     * Checks TRUE/FALSE if there is a user related to an ID
+     * @param id Identification to check
+     * @return TRUE / FALSE
+     */
+    public boolean validateExistenceById(String id){
+        eventLogger.log(org.apache.logging.log4j.Level.INFO, "-API\t--SERVICE\t---GET\t----VALIDATE EXISTENCE BY ID\t-----@{}", id);
+        return userRepository.getValidationById(id);
+    }
+
+    /**
+     * Checks TRUE/FALSE for a username availability
+     * @param username Username to check
+     * @return TRUE / FALSE
+     */
+    public boolean validateUsernameExistence(String username){
+        eventLogger.log(org.apache.logging.log4j.Level.INFO, "-API\t--SERVICE\t---GET\t----VALIDATE USERNAME AVAILABILITY\t-----@{}", username);
+        //Convert the result to its opposite, because if is there a true, it means the user isn't available
+        return !userRepository.getAvailableUsername(username);
+    }
+
+    /**
+     * Checks TRUE/FALSE if there is a user related to an email address
+     * @param email Email to check
+     * @return TRUE / FALSE
+     */
+    public boolean validateExistenceByEmail(String email){
+        eventLogger.log(org.apache.logging.log4j.Level.INFO, "-API\t--SERVICE\t---GET\t----VALIDATE EXISTENCE BY EMAIL\t-----@{}", email);
+        return userRepository.getValidationByEmail(email);
     }
 
     /**
@@ -182,14 +221,14 @@ public class UserServiceGeneral {
      * @param usr Username target
      * @return List<uf_sisinfo_userapps> to let system the apps list available for a user
      */
-    public List<uf_sisinfo_userapps> userGetAppsPermissions(String usr){
+    public List<uf_sisinfo_AppsAndPermissions> userGetAppsPermissions(String usr){
         eventLogger.log(org.apache.logging.log4j.Level.INFO, "-API\t--SERVICE\t---GET\t----USER APPS AND PERMISSIONS\t-----@{}", usr);
-        List<uf_sisinfo_userapps> resultObj;
+        List<uf_sisinfo_AppsAndPermissions> resultObj;
         if(validateUser(usr)){
             //User exists
              resultObj = userRepository.getAppsPermissions(usr);
             //Count how many apps were assigned
-            if(resultObj.stream().filter(app -> usr.equals(app.getUsername())).count() == 0){
+            if(resultObj.stream().noneMatch(app -> usr.equals(app.getCOD_USUARIO()))){
                 //User doesn't have any app assigned
                 throw new BusinessException(ErrorCodes.USER_GETAPPPERMISSIONS_NORECORDS);
             }
@@ -208,7 +247,7 @@ public class UserServiceGeneral {
      * @return TRUE OR FALSE
      */
     public boolean setUserLastAccessDeskapp(String usr, String newDate){
-        eventLogger.log(org.apache.logging.log4j.Level.INFO, "-API\t--SERVICE\t---GET\t----UPDATE USER LAST ACCESS DATE\t-----@{}\t{}", usr,newDate);
+        eventLogger.log(org.apache.logging.log4j.Level.INFO, "-API\t--SERVICE\t---GET\t----UPDATE USER LAST ACCESS DATE ON DESKAPP\t-----@{}\t{}", usr,newDate);
         boolean resultTemp;
 
         if(validateUser(usr)){
@@ -226,26 +265,43 @@ public class UserServiceGeneral {
     }
 
 
+
+    public boolean addExecutiveLog(uf_registro_ejecutivo reg){
+        eventLogger.log(org.apache.logging.log4j.Level.INFO, "-API\t--SERVICE\t---GET\t----ADD WORKLOG EVENT INSIDE DESKAPP\t-----@{}\t{}", reg.getCOD_EMPLEADO(),reg.getREG_APPSET());
+        if(reg.getCOD_EMPLEADO() != null){
+            if(userRepository.addExecutiveLog(reg)){
+                return true;
+            }else{
+                throw new BusinessException(ErrorCodes.USER_EVENTLOG_WORK_FAILS);
+            }
+        }else{
+            throw new BusinessException(ErrorCodes.USER_EVENTLOG_ADD_OBJFAIL);
+        }
+
+    }
+
+
+
     /**
      * Service to perform user addition to the system-info as a common user.
      * @param userdata uf_user_profile Object with target user data
      * @return uf_user_profile Object
      */
-    public uf_user_profile addUser(uf_user_profile userdata){
+    public uf_personas addUser(uf_personas userdata){
         eventLogger.log(org.apache.logging.log4j.Level.INFO,
                 "-API\t--SERVICE\t---POST\t----ADD USER\t-----@{}\t{}\t{}",
-                userdata.getIdPersona(),userdata.getApellidos(),userdata.getNombres());
+                userdata.getPRSN_USUARIO(),userdata.getPRSN_APE(),userdata.getPRSN_NOM());
         //Perform password encryption
         /*
         *   DUE TO BUSINESS RULE, NO ONE, INCLUDED STAFF, CAN ASSIGN THE PASSWORD.
         *   FOR THE USER ADDITION PROCEDURE THE DEFAULT PASSWORD WILL BE USERNAME ASSIGNED + ID NUMBER OR IDENTIFICATION + CLOSES WITH '#'.
         * */
-        userdata.setPkeyusuario(new BCryptPasswordEncoder().encode(userdata.getUsername()+userdata.getIdPersona()+"#"));
+        userdata.setPRSN_PKEY(new BCryptPasswordEncoder().encode(userdata.getPRSN_USUARIO()+userdata.getPRSN_ID()+"#"));
         //Perform operations
-        if(!validateUser(userdata.getUsername())){
+        if(!validateUser(userdata.getPRSN_USUARIO())){
             //Can add the user
             if(userRepository.addUser(userdata)){
-               userdata = userRepository.getUserBasicData(userdata.getUsername()).get(0);
+               userdata = userRepository.getUserBasicData(userdata.getPRSN_USUARIO()).get(0);
             }else{
                 //There's something bad occurs with DDBB operation
                 throw new BusinessException(ErrorCodes.USER_SIGNUP_QUERY_ERROR);
@@ -266,27 +322,20 @@ public class UserServiceGeneral {
      * @throws JsonPatchException Patching JSON Node exception
      * @throws JsonProcessingException JSON conversion
      */
-    public uf_user_profile patchUser(String usr, JsonPatch jsonPatch) throws JsonPatchException, JsonProcessingException {
+    public uf_personas patchUser(String usr, JsonPatch jsonPatch) throws JsonPatchException, JsonProcessingException {
         eventLogger.log(org.apache.logging.log4j.Level.INFO, "-API\t--SERVICE\t---PATCH\t----USER PROFILE DATA\t-----@{}", usr);
         //If the target user, proceed with updates
         if(validateUser(usr)){
-            uf_user_profile target = userRepository.getUserBasicData(usr).get(0);
+            uf_personas target = userRepository.getUserBasicData(usr).get(0);
             // Path jsonPatch object to class
-            objMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-            JsonNode patched = jsonPatch.apply(objMapper.convertValue(target,JsonNode.class));
-            uf_user_profile newUser = objMapper.treeToValue(patched, uf_user_profile.class);
-            /*
-             * BUSINESS RULE: Validate if inside the JsonPatch request exists a password update, it can be known if exists a field named 'pkeyusuario'.
-             * If exists then encode the new password.
-             * This is necessary to prevent take the encoded user's password at the moment and encode it again (encoding something that is already encoded)
-             * making login and validation access failures
-             * */
-            /*
-             *   DUE TO BUSINESS RULE, NO ONE, INCLUDED STAFF, CAN ASSIGN THE PASSWORD.
-             *   FOR THE USER ADDITION PROCEDURE THE DEFAULT PASSWORD WILL BE USERNAME ASSIGNED + ID NUMBER OR IDENTIFICATION + CLOSES WITH '#'.
-             *   ANYTHING THAT COMES INTO THE PKEYUSUARIO ATTRIBUTE WILL BE OVERWRITTEN.
-             * */
-            newUser.setPkeyusuario(new BCryptPasswordEncoder().encode(newUser.getPkeyusuario()));
+            objMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL); //Include non null and null values
+            JsonNode patched = jsonPatch.apply(objMapper.convertValue(target,JsonNode.class)); //Patch json to JsonNodeObject
+            uf_personas newUser = objMapper.treeToValue(patched, uf_personas.class); //Patch jsonnodeobject to class
+            //Perform validation on PKEYUSUARIO (password), to prevent re-encryption of existent password
+            if(jsonPatch.toString().toUpperCase().contains("PRSN_PKEY")){
+                //Need password change
+                newUser.setPRSN_PKEY(new BCryptPasswordEncoder().encode(newUser.getPRSN_PKEY()));
+            }
             //Perform update
             if(userRepository.updateItemUSR(newUser)){
                 //Return new user profile data
@@ -308,34 +357,23 @@ public class UserServiceGeneral {
      * @param userdata uf_user_profile Object with new values
      * @return uf_user_profile Object
      */
-    public uf_user_profile putUser(String usr, uf_user_profile userdata){
+    public uf_personas putUser(String usr, uf_personas userdata){
+        uf_personas newProfile = null;
         eventLogger.log(org.apache.logging.log4j.Level.INFO, "-API\t--SERVICE\t---PUT\t----PUT USER PROFILE DATA\t-----@{}", usr);
-        /*
-         *   KNOWING THE PRACTICES OF 'PUT' METHOD WHERE IF THE REQUEST TRIES TO UPDATE SOME RESOURCE THAT DOESN'T EXIST, THEN IT ADDS THE RESOURCE.
-         *   THIS PROCEDURE WILL BE BASED ON A BUSINESS RULE DISTANT FROM THE COMMON OR KNOWN PRACTICES.
-         *   SO IF THE REQUEST TRIES TO UPDATE SOMETHING THAT DOESN'T, THEN THE PROCEDURE THROWS AN EXCEPTION, OTHERWISE
-         *   PERFORM USE OF RESOURCE 'UPDATE' SERVICE PROVIDED BY THE REPOSITORY.
-         * */
-
-        /*
-         * BUSINESS RULE: Validate if inside the JsonPatch request exists a password update, it can be known if exists a field named 'pkeyusuario'.
-         * If exists then encode the new password.
-         * This is necessary to prevent take the encoded user's password at the moment and encode it again (encoding something that is already encoded)
-         * making login and validation access failures
-         * */
         //Perform operations
         if(validateUser(usr)){
-            //Perform update
-            /*
-             *   DUE TO BUSINESS RULE, NO ONE, INCLUDED STAFF, CAN ASSIGN THE PASSWORD.
-             *   FOR THE USER ADDITION PROCEDURE THE DEFAULT PASSWORD WILL BE USERNAME ASSIGNED + ID NUMBER OR IDENTIFICATION + CLOSES WITH '#'.
-             *   ANYTHING THAT COMES INTO THE PKEYUSUARIO ATTRIBUTE WILL BE OVERWRITTEN.
-             * */
-             userdata.setPkeyusuario(new BCryptPasswordEncoder().encode(userdata.getUsername()+userdata.getIdPersona()+"#"));
+            //Perform update of password
+            if(userdata.getPRSN_PKEY().isEmpty() || userdata.getPRSN_PKEY().isBlank()){
+                //Set default password by business rule
+                userdata.setPRSN_PKEY(new BCryptPasswordEncoder().encode(userdata.getPRSN_USUARIO()+userdata.getPRSN_ID()+"#"));
+            }else{
+                //It comes with a custom password value
+                userdata.setPRSN_PKEY(new BCryptPasswordEncoder().encode(userdata.getPRSN_PKEY()));
+            }
 
             //Perform validations
             if(userRepository.updateItemUSR(userdata)){
-                userdata = userRepository.getUserBasicData(userdata.getUsername()).get(0);
+                newProfile = userRepository.getUserBasicData(userdata.getPRSN_USUARIO()).get(0);
             }else{
                 //There's something bad occurs with DDBB operation
                 throw new BusinessException(ErrorCodes.USER_SIGNUP_QUERY_ERROR);
@@ -343,7 +381,7 @@ public class UserServiceGeneral {
         }else{
             throw new BusinessException(ErrorCodes.USER_VALIDATION_USER_NOEXISTS);
         }
-        return userdata;
+        return newProfile;
     }
 
 

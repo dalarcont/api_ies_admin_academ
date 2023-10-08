@@ -10,7 +10,7 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.ies.ies_admin_academ.config.Routes;
 import com.ies.ies_admin_academ.model.entities.*;
-import com.ies.ies_admin_academ.services.UserServiceGeneral;
+import com.ies.ies_admin_academ.services.UserService;
 import org.springframework.web.bind.annotation.*;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
@@ -21,11 +21,12 @@ import java.util.List;
 @RequestMapping(Routes.ROOT.USERS)
 public class UserController {
 
-    private final UserServiceGeneral userServiceGeneral;
-    public UserController(UserServiceGeneral userServiceGeneral) {
+    private final UserService userServiceGeneral;
+    public UserController(UserService userServiceGeneral) {
         this.userServiceGeneral = userServiceGeneral;
     }
 
+    //TOOLS
     /**
      * Receives encoded credentials of a user from the frontEnd and convert to use it as normal string content.
      * @param cad   Encoded credentials as one single string
@@ -39,7 +40,8 @@ public class UserController {
         return new String[] {a,b};
     }
 
-
+    //FINAL ENDPOINTS
+    //GET
     @GetMapping(Routes.GET.USERS.EXISTENCEPROOF)
     public boolean userValidateExistence(
             @PathVariable("username") String username){
@@ -47,15 +49,15 @@ public class UserController {
     }
 
     @GetMapping(Routes.GET.USERS.GET_USER_PROFILE)
-    public uf_user_profile userGetProfileData(
+    public uf_personas userGetProfileData(
     //public List<uf_user_profile> userGetProfileData(
             @PathVariable("data") String data){
         //Perform endpoint consumption
-        return userServiceGeneral.getUserProfileData(data).get(0);
+        return userServiceGeneral.userGetProfileData(data).get(0);
     }
 
     @GetMapping(Routes.GET.USERS.GET_EMPLOYEE_PROFILE)
-    public uf_employee_profile userGetEmployeeData(
+    public uf_personas_empleado userGetEmployeeData(
     //public List<uf_employee_profile> userGetEmployeeData(
             @PathVariable("data") String data){
         //Perform endpoint consumption
@@ -63,7 +65,7 @@ public class UserController {
     }
 
     @GetMapping(Routes.GET.USERS.GET_STUDENT_PROFILE)
-    public uf_student_profile userGetStudentData(
+    public uf_personas_estudiante userGetStudentData(
             @PathVariable("data") String data){
         //Perform endpoint consumption
         return userServiceGeneral.getStudentProfile(data).get(0);
@@ -81,7 +83,7 @@ public class UserController {
     public boolean validateDeskappAccess(
             @PathVariable("data") String data){
             //Perform endpoint consumption
-            return userServiceGeneral.validateDeskappAccess(data);
+        return userServiceGeneral.validateDeskappAccess(data);
     }
 
     @GetMapping(Routes.GET.USERS.STUDENT_ACCESS)
@@ -92,20 +94,51 @@ public class UserController {
     }
 
     @GetMapping(Routes.GET.USERS.SYSINFO_PERMISSIONS)
-    public List<uf_sisinfo_userapps> userGetAppsPermissions(
+    public List<uf_sisinfo_AppsAndPermissions> userGetAppsPermissions(
             @PathVariable("data") String data){
             //Perform endpoint consumption
             return userServiceGeneral.userGetAppsPermissions(dataDecoder(data)[0]);
     }
 
+
+
+    @GetMapping(Routes.GET.USERS.EXISTENCEPROOF_BYID)
+    public boolean validationById(
+            @PathVariable("data") String data) {
+        //Perform endpoint consumption
+        return userServiceGeneral.validateExistenceById(data);
+    }
+
+    @GetMapping(Routes.GET.USERS.USR_ADD_VAL_USERNAME)
+    public boolean usernameValidationSignup(
+            @PathVariable("data") String data) {
+        //Perform endpoint consumption
+        return userServiceGeneral.validateUsernameExistence(data);
+    }
+
+    @GetMapping(Routes.GET.USERS.USR_ADD_VAL_EMAIL)
+    public boolean emailValidationSignup(
+            @PathVariable("data") String data){
+        //Perform endpoint consumption
+        return userServiceGeneral.validateExistenceByEmail(data);
+    }
+
+    //POST
     @PostMapping
-    public uf_user_profile userAddUser(@RequestBody uf_user_profile userdata){
+    public uf_personas userAddUser(@RequestBody uf_personas userdata){
         //Perform endpoint consumption
         return userServiceGeneral.addUser(userdata);
     }
 
+    @PostMapping(Routes.POST.USERS.ADD_EVENT_WORKLOG)
+    public boolean addEventWorklog(@RequestBody uf_registro_ejecutivo data){
+        //Perform endpoint consumption
+        return userServiceGeneral.addExecutiveLog(data);
+    }
+
+    //PATCH
     @PatchMapping(Routes.ROOT.BODY)
-    public uf_user_profile userPatchItem(
+    public uf_personas userPatchItem(
             @PathVariable String data,
             @RequestBody JsonPatch jsonPatch) throws JsonPatchException, JsonProcessingException {
         //Decode user and password
@@ -113,7 +146,7 @@ public class UserController {
 
     }
 
-    @GetMapping(Routes.GET.USERS.SYSTEM_DESKAPP_RECORDACCESS)
+    @PatchMapping(Routes.PATCH.USERS.SYSTEM_DESKAPP_RECORDACCESS)
     public boolean userNewAccessRecord(
             @PathVariable("data") String data){
         //new date data
@@ -122,14 +155,16 @@ public class UserController {
         return userServiceGeneral.setUserLastAccessDeskapp(dataDecoder(data)[0], newDate);
     }
 
+    //PUT
     @PutMapping(Routes.ROOT.BODY)
-    public uf_user_profile userPutProfile(
+    public uf_personas userPutProfile(
             @PathVariable String data,
-            @RequestBody uf_user_profile userdata){
+            @RequestBody uf_personas userdata){
         //Perform endpoint consumption
         return userServiceGeneral.putUser(data,userdata);
     }
 
+    //DELETE
     @DeleteMapping(Routes.ROOT.BODY)
     public boolean deleteUser(@PathVariable String data){
         //Perform endpoint consumption

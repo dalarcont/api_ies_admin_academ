@@ -6,8 +6,10 @@ package com.ies.ies_admin_academ.repositories;
 * */
 
 import com.ies.ies_admin_academ.model.entities.*;
+import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -27,8 +29,8 @@ public class UserRepository {
      * @param username Username of the target user
      * @return Object uf_user_profile
      */
-    public List<uf_user_profile> getUserBasicData(String username){
-       return daoUser.query("SELECT * FROM uf_personas WHERE USERNAME=?;",new BeanPropertyRowMapper<>(uf_user_profile.class),username);
+    public List<uf_personas> getUserBasicData(String username){
+        return daoUser.query(dbQueries.USER.GET_USER_BASIC_DATA_QUERY,new BeanPropertyRowMapper<>(uf_personas.class),username);
     }
 
     /**
@@ -37,16 +39,9 @@ public class UserRepository {
      * @param username Username of the target user
      * @return Object uf_employee_profile
      */
-    public List<uf_employee_profile> getEmployeeProfile(String username){
-        return daoUser.query("SELECT " +
-                        "ufp.*, " +
-                        "ufpl.DEPARTAMENTO, ufpl.AREA, ufpl.CARGO, ufpl.CONTRATACION, ufpl.ESTADO, ufpl.TIPOPERSONAL, ufpl.CARGOPRINCIPAL, ufpl2.DESKAPP, ufpl2.LAST_ACCESS " +
-                        "FROM uf_personas AS ufp " +
-                        "LEFT JOIN uf_personalinstitucional AS ufpl ON ufpl.USERNAME = ufp.USERNAME " +
-                        "LEFT JOIN uf_portallaboral AS ufpl2 ON ufpl2.USERNAME = ufp.USERNAME " +
-                        "WHERE ufp.USERNAME = ? AND " +
-                        "ufpl.CARGOPRINCIPAL = 1;",
-                        new BeanPropertyRowMapper<>(uf_employee_profile.class),username);
+    public List<uf_personas_empleado> getEmployeeProfile(String username){
+        return daoUser.query(dbQueries.USER.GET_EMPLOYEE_PROFILE_QUERY,
+                        new BeanPropertyRowMapper<>(uf_personas_empleado.class),username);
     }
 
     /**
@@ -55,19 +50,22 @@ public class UserRepository {
      * @param username Username of the target user
      * @return Object uf_student_profile
      */
-    public List<uf_student_profile> getStudentProfile(String username){
-        return daoUser.query("SELECT " +
-                        "ufp.*, " +
-                        "ufeg.fechaingreso, ufeg.estadogeneral, ufeg.puntajeingreso, ufeg.ultimoprogramamatriculado, " +
-                        "ufep.studentportal, ufep.last_access " +
-                        "FROM uf_personas AS ufp " +
-                        " LEFT JOIN uf_estudiantes_general AS ufeg ON ufeg.USERNAME = ufp.USERNAME" +
-                        " LEFT JOIN uf_estudiantes_portal AS ufep ON ufep.USERNAME = ufp.USERNAME " +
-                        "WHERE " +
-                        "ufp.USERNAME=? AND " +
-                        "ufeg.USERNAME=ufp.USERNAME AND " +
-                        "ufep.USERNAME=ufp.USERNAME;",
-                new BeanPropertyRowMapper<>(uf_student_profile.class),username);
+    public List<uf_personas_estudiante> getStudentProfile(String username){
+        return daoUser.query(dbQueries.USER.GET_STUDENT_PROFILE_QUERY,
+                new BeanPropertyRowMapper<>(uf_personas_estudiante.class),username);
+    }
+
+    /**
+     * Perform query to get user credentials match to login
+     * @param username Username of the target user
+     * @param pwd Password of the target user
+     * @return boolean
+     */
+    public boolean matchLogin(String username, String pwd){
+        String gotDdbbPkey = daoUser.queryForObject(dbQueries.USER.MATCH_LOGIN_QUERY,
+                String.class,
+                username);
+        return Boolean.TRUE.equals(new BCryptPasswordEncoder().matches(pwd,gotDdbbPkey));
     }
 
     /**
@@ -76,8 +74,9 @@ public class UserRepository {
      * @return boolean
      */
     public boolean deskappAccess(String username){
-        return Boolean.TRUE.equals(daoUser.queryForObject("SELECT COUNT(*) FROM uf_portallaboral WHERE username = ? AND DESKAPP = 1;",
-                boolean.class, username));
+        return Boolean.TRUE.equals(daoUser.queryForObject(dbQueries.USER.DESKAPP_ACCESS_QUERY,
+                boolean.class,
+                username));
     }
 
     /**
@@ -86,36 +85,49 @@ public class UserRepository {
      * @return boolean
      */
     public boolean stdAccess(String username){
-        return Boolean.TRUE.equals(daoUser.queryForObject("SELECT COUNT(*) FROM uf_estudiantes_portal WHERE username = ? AND STUDENTPORTAL = 1;",
-                boolean.class, username));
+        return Boolean.TRUE.equals(daoUser.queryForObject(dbQueries.USER.STUDENT_ACCESS_QUERY,
+                boolean.class,
+                username));
     }
 
     /**
      * Perform query operation to get a list of the applications that a user is able to use
-     * @param username Username of the target user
-     * @return List of uf_sisinfo_userapps objects
+     * @param username Username of the target user.
+     * @return List of uf_sisinfo_userapps object
      */
-    public List<uf_sisinfo_userapps> getAppsPermissions(String username){
+    public List<uf_sisinfo_AppsAndPermissions> getAppsPermissions(String username){
         return daoUser.query(
-                "SELECT null AS USERNAME, " +
-                        "sia.APPCODE, " +
-                        "1 AS PERMISSION, " +
-                        "sia.APPNAME, " +
-                        "sia.APPDESCRIPTION, " +
-                        "sia.TREELEVEL " +
-                        "FROM uf_sisinfo_apps sia WHERE sia.APPDESCRIPTION IN('') " +
-                        "UNION SELECT " +
-                        "sip.*, " +
-                        "sia2.APPNAME, " +
-                        "sia2.APPDESCRIPTION, " +
-                        "sia2.TREELEVEL " +
-                        "FROM  uf_sisinfo_permisibilidad sip, uf_sisinfo_apps sia2 " +
-                        "WHERE sip.USERNAME = ? " +
-                        "AND sip.PERMISSION = 1 " +
-                        "AND sia2.APPCODE = sip.APPCODE;",
-                new BeanPropertyRowMapper<>(uf_sisinfo_userapps.class),username);
+                dbQueries.USER.SISINFO_APPS_PERMISSIONS_QUERY,
+                new BeanPropertyRowMapper<>(uf_sisinfo_AppsAndPermissions.class),
+                username);
     }
 
+    /**
+     * Checks TRUE/FALSE if there is a user related to an ID
+     * @param id Identification to check
+     * @return TRUE / FALSE
+     */
+    public boolean getValidationById(String id){
+        return Boolean.TRUE.equals(daoUser.queryForObject(dbQueries.USER.GET_VALIDATION_BY_ID,boolean.class,id));
+    }
+
+    /**
+     * Checks TRUE/FALSE for a username availability
+     * @param usr Username to check
+     * @return TRUE / FALSE
+     */
+    public boolean getAvailableUsername(String usr){
+        return Boolean.TRUE.equals(daoUser.queryForObject(dbQueries.USER.GET_USERNAME_AVAILABLE,boolean.class,usr));
+    }
+
+    /**
+     * Checks TRUE/FALSE if there is a user related to an email address
+     * @param email Email to check
+     * @return TRUE / FALSE
+     */
+    public boolean getValidationByEmail(String email){
+        return Boolean.TRUE.equals(daoUser.queryForObject(dbQueries.USER.GET_VALIDATION_BY_EMAIL,boolean.class,email));
+    }
 
     /**
      * Perform employee's last access date update
@@ -124,7 +136,19 @@ public class UserRepository {
      * @return TRUE OR FALSE
      */
     public boolean setLastAccessRecord(String usr, String newDate){
-        return (daoUser.update("UPDATE uf_portallaboral SET last_access = ? WHERE username = ? ;", newDate, usr) == 1);
+        return (daoUser.update(dbQueries.USER.UPDATE_DESKAPP_LAST_ACCESS_QUERY, newDate, usr) == 1);
+    }
+
+    /**
+     * Perform insertion of a work event log
+     * @param workEventLog Object with data to insert
+     * @return
+     */
+    public boolean addExecutiveLog(uf_registro_ejecutivo workEventLog){
+        return daoUser.update(dbQueries.USER.ADD_EVENT_LOG_WORK,
+                workEventLog.getCOD_EMPLEADO(),
+                workEventLog.getREG_APPSET(),
+                workEventLog.getREG_ACTION_DESCR()) == 1;
     }
 
     /**
@@ -132,36 +156,22 @@ public class UserRepository {
      * @param userprofile User object with attributes
      * @return TRUE OR FALSE about the query execution
      */
-    public boolean addUser(uf_user_profile userprofile){
+    public boolean addUser(uf_personas userprofile){
         return
-             daoUser.update("INSERT INTO uf_personas " +
-                     "(idpersona," +
-                     "nombres," +
-                     "apellidos," +
-                     "username," +
-                     "genero," +
-                     "email_personal," +
-                     "email_laboral," +
-                     "origen_pais," +
-                     "origen_ciudad," +
-                     "reside_pais," +
-                     "reside_ciudad," +
-                     "escolaridad," +
-                     "pkeyusuario)"
-                     +" VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                     userprofile.getIdPersona(),
-                     userprofile.getNombres(),
-                     userprofile.getApellidos(),
-                     userprofile.getUsername(),
-                     userprofile.getGenero(),
-                     userprofile.getEmail_personal().toLowerCase(),
-                     userprofile.getEmail_laboral().toLowerCase(),
-                     userprofile.getOrigen_pais(),
-                     userprofile.getOrigen_ciudad().toUpperCase(),
-                     userprofile.getReside_pais(),
-                     userprofile.getReside_ciudad().toUpperCase(),
-                     userprofile.getEscolaridad(),
-                     userprofile.getPkeyusuario()
+             daoUser.update(dbQueries.USER.INSERT_PERSONA_QUERY,
+                     userprofile.getPRSN_ID(),
+                     userprofile.getPRSN_NOM(),
+                     userprofile.getPRSN_APE(),
+                     userprofile.getPRSN_USUARIO(),
+                     userprofile.getPRSN_GEN(),
+                     userprofile.getPRSN_EMAIL_PERSONAL().toLowerCase(),
+                     userprofile.getPRSN_EMAIL_LABORAL().toLowerCase(),
+                     userprofile.getPRSN_ORIGEN_PAIS(),
+                     userprofile.getPRSN_ORIGEN_CIUDAD().toUpperCase(),
+                     userprofile.getPRSN_RESIDE_PAIS(),
+                     userprofile.getPRSN_RESIDE_CIUDAD().toUpperCase(),
+                     userprofile.getPRSN_ESCOLARIDAD(),
+                     userprofile.getPRSN_PKEY()
              ) == 1;
     }
 
@@ -170,49 +180,36 @@ public class UserRepository {
      * @param usr Username of the target user
      * @return TRUE or FALSE of the query execution
      */
-    public boolean updateItemUSR(uf_user_profile usr){
+    public boolean updateItemUSR(uf_personas usr){
         /*
          * BUSINESS RULE: Strictly NO ONE can modify sign-up date. Don't add inside the query that field.
          * */
-        return daoUser.update("UPDATE uf_personas " +
-                        "SET IDPERSONA=?, " +
-                        "NOMBRES=?, " +
-                        "APELLIDOS=?, " +
-                        "GENERO=?, " +
-                        "EMAIL_PERSONAL=?, " +
-                        "EMAIL_LABORAL=?," +
-                        "ORIGEN_PAIS=?," +
-                        "ORIGEN_CIUDAD=?," +
-                        "RESIDE_PAIS=?," +
-                        "RESIDE_CIUDAD=?," +
-                        "ESCOLARIDAD=?," +
-                        "PKEYUSUARIO=?," +
-                        "RECUPERAR_PREGUNTA=?," +
-                        "RECUPERAR_RESPUESTA=? " +
-                        "WHERE USERNAME = ?;",
-                usr.getIdPersona(),
-                usr.getNombres(),
-                usr.getApellidos(),
-                usr.getGenero(),
-                usr.getEmail_personal().toLowerCase(),
-                usr.getEmail_laboral().toLowerCase(),
-                usr.getOrigen_pais(),
-                usr.getOrigen_ciudad().toUpperCase(),
-                usr.getReside_pais(),
-                usr.getReside_ciudad().toUpperCase(),
-                usr.getEscolaridad(),
-                usr.getPkeyusuario(),
-                usr.getRecuperar_pregunta(),
-                usr.getRecuperar_respuesta(),
-                usr.getUsername())==1;
+        return daoUser.update(dbQueries.USER.UPDATE_ITEM_PERSONA_QUERY,
+                usr.getPRSN_ID(),
+                usr.getPRSN_NOM(),
+                usr.getPRSN_APE(),
+                usr.getPRSN_GEN(),
+                usr.getPRSN_EMAIL_PERSONAL().toLowerCase(),
+                usr.getPRSN_EMAIL_LABORAL().toLowerCase(),
+                usr.getPRSN_ORIGEN_PAIS(),
+                usr.getPRSN_ORIGEN_CIUDAD().toUpperCase(),
+                usr.getPRSN_RESIDE_PAIS(),
+                usr.getPRSN_RESIDE_CIUDAD().toUpperCase(),
+                usr.getPRSN_ESCOLARIDAD(),
+                usr.getPRSN_PKEY(),
+                usr.getPRSN_RECOVERY_QUEST(),
+                usr.getPRSN_RECOVERY_ANS(),
+                usr.getPRSN_USUARIO())==1;
+
     }
 
-
+    /**
+     * Perform delete user profile
+     * @param usr User target
+     * @return TRUE or FALSE
+     */
     public boolean deleteUser(String usr){
         //Perform DB query
-        return daoUser.update("DELETE FROM uf_personas WHERE USERNAME = ?;",usr)==1;
+        return daoUser.update(dbQueries.USER.DELETE_SOLO_PERSONA_QUERY,usr)==1;
     }
-
-
-
 }

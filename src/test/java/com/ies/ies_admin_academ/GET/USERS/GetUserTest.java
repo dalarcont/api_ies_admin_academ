@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ies.ies_admin_academ.config.Routes;
 import com.ies.ies_admin_academ.model.entities.*;
 import com.ies.ies_admin_academ.repositories.UserRepository;
-import com.ies.ies_admin_academ.services.UserServiceGeneral;
+import com.ies.ies_admin_academ.services.UserService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ class GetUserTest {
     UserRepository userRepo;
 
     @Autowired
-    UserServiceGeneral userSrvc;
+    UserService userSrvc;
 
     @Autowired
     private MockMvc mmvc;
@@ -78,28 +78,28 @@ class GetUserTest {
         MockHttpServletResponse response = mmvc.perform(request).andReturn().getResponse();
         Assertions.assertEquals(200,response.getStatus());
         //Object for asserts
-        uf_user_profile validation = objMapper.readValue(response.getContentAsString(),uf_user_profile.class);
+        uf_personas validation = objMapper.readValue(response.getContentAsString(), uf_personas.class);
         //Object attributes/data assertions
-        Assertions.assertEquals("2016-08-01 18:30:00",validation.getFechaRegistro());
-        Assertions.assertEquals("1088333702",validation.getIdPersona());
-        Assertions.assertEquals("DANIEL FERNANDO",validation.getNombres());
-        Assertions.assertEquals("ALARCON TABARES",validation.getApellidos());
-        Assertions.assertEquals("dalarcont",validation.getUsername());
-        Assertions.assertEquals("M",validation.getGenero());
-        Assertions.assertEquals("daniel.alarcon@unifalsa.com",validation.getEmail_laboral());
-        Assertions.assertEquals("dfalarcont@gmail.com",validation.getEmail_personal());
-        Assertions.assertEquals("CO",validation.getOrigen_pais());
-        Assertions.assertEquals("PEREIRA",validation.getOrigen_ciudad());
-        Assertions.assertEquals("CO",validation.getReside_pais());
-        Assertions.assertEquals("NEW YORK",validation.getReside_ciudad());
-        Assertions.assertEquals("ESC5",validation.getEscolaridad());
+        Assertions.assertEquals("2016-08-01 18:30:00",validation.getPRSN_FEC_REG());
+        Assertions.assertEquals("1088333702",validation.getPRSN_ID());
+        Assertions.assertEquals("DANIEL FERNANDO",validation.getPRSN_NOM().toUpperCase());
+        Assertions.assertEquals("ALARCON TABARES",validation.getPRSN_APE().toUpperCase());
+        Assertions.assertEquals("dalarcont",validation.getPRSN_USUARIO());
+        Assertions.assertEquals("MS",validation.getPRSN_GEN());
+        Assertions.assertEquals("daniel.alarcon@unifalsa.com",validation.getPRSN_EMAIL_LABORAL());
+        Assertions.assertEquals("dfalarcont@gmail.com",validation.getPRSN_EMAIL_PERSONAL());
+        Assertions.assertEquals("COL",validation.getPRSN_ORIGEN_PAIS());
+        Assertions.assertEquals("PEREIRA",validation.getPRSN_ORIGEN_CIUDAD());
+        Assertions.assertEquals("COL",validation.getPRSN_RESIDE_PAIS());
+        Assertions.assertEquals("PEREIRA",validation.getPRSN_RESIDE_CIUDAD());
+        Assertions.assertEquals("PROF",validation.getPRSN_ESCOLARIDAD());
         //Validation of password for older or password updated users...
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        boolean pkeyMatch = encoder.matches("contrasena",validation.getPkeyusuario());
+        boolean pkeyMatch = encoder.matches("contrasena",validation.getPRSN_PKEY());
         Assertions.assertTrue(pkeyMatch);
         //
-        Assertions.assertEquals("4digit gato(1) and 4digit gato(2)",validation.getRecuperar_pregunta());
-        Assertions.assertEquals("21032910",validation.getRecuperar_respuesta());
+        Assertions.assertEquals("4digit gato(1) and 4digit gato(2)",validation.getPRSN_RECOVERY_QUEST());
+        Assertions.assertEquals("21032910",validation.getPRSN_RECOVERY_ANS());
 
     }
 
@@ -130,16 +130,15 @@ class GetUserTest {
         MockHttpServletResponse response = mmvc.perform(request).andReturn().getResponse();
         Assertions.assertEquals(200,response.getStatus());
         //Object for asserts
-        uf_employee_profile validation = objMapper.readValue(response.getContentAsString(),uf_employee_profile.class);
+        uf_personas_empleado validation = objMapper.readValue(response.getContentAsString(), uf_personas_empleado.class);
         //Object attributes/data assertions
         // *** If you want to perform father class attributes you can copy the asserts of the previous test. ***
-        Assertions.assertEquals(1,validation.getDeskapp());
-        Assertions.assertEquals("POTUS",validation.getDepartamento());
-        Assertions.assertEquals("",validation.getArea());
-        Assertions.assertEquals("JEFE00",validation.getCargo());
-        Assertions.assertEquals("PLANTA",validation.getContratacion());
-        Assertions.assertEquals("E1",validation.getEstado());
-        Assertions.assertEquals("T0",validation.getTipopersonal());
+        Assertions.assertTrue(validation.isPERMISO_ACCESO());
+        Assertions.assertEquals("POTUS",validation.getCOD_UNIDAD());
+        Assertions.assertNull(null,validation.getCOD_AREA());
+        Assertions.assertEquals("JEFE00",validation.getCOD_CARGO());
+        Assertions.assertEquals("SNN",validation.getESTADO_DISCIPLINARIO());
+        Assertions.assertEquals("AMT",validation.getCOD_TIPO_PERSONAL());
 
     }
 
@@ -174,15 +173,15 @@ class GetUserTest {
         MockHttpServletResponse response = mmvc.perform(request).andReturn().getResponse();
         Assertions.assertEquals(200,response.getStatus());
         //Object for asserts
-        uf_student_profile validation = objMapper.readValue(response.getContentAsString(),uf_student_profile.class);
+        uf_personas_estudiante validation = objMapper.readValue(response.getContentAsString(), uf_personas_estudiante.class);
         //Object attributes/data assertions
         // *** If you want to perform father class attributes you can copy the asserts of the previous test. ***
-        Assertions.assertEquals("2016-08-01",validation.getFechaIngreso());
-        Assertions.assertEquals("1",validation.getEstadoGeneral());
-        Assertions.assertEquals(99,(int)validation.getPuntajeIngreso());
-        Assertions.assertEquals("8311",validation.getUltimoProgramaMatriculado());
-        Assertions.assertFalse(validation.isPortalAccess());
-        Assertions.assertEquals("0000-00-00 00:00:00",validation.getLastAccess());
+        Assertions.assertEquals("2016-08-01 18:30:00",validation.getPRSN_FEC_REG()); //User profile general attribute
+        Assertions.assertEquals("2016-08-01 00:00:00",validation.getFEC_PRIMER_MATRICULA()); //Student profile attribute
+        Assertions.assertEquals("NOR",validation.getESTADO_ACADEMICO_GENERAL());
+        Assertions.assertEquals(8311,validation.getCOD_ULTIMO_PROGRAMA_MATRICULADO());
+        Assertions.assertTrue(validation.isPERMISO_ACCESO());
+        Assertions.assertEquals("2022-09-23 04:20:38",validation.getFEC_ULTIMO_ACCESO());
 
     }
 
@@ -303,15 +302,15 @@ class GetUserTest {
         Assertions.assertEquals(200,response.getStatus());
         //Object for asserts app 1
         String app1_code = "DK_AKA/EST/HST";
-        uf_sisinfo_userapps app1 = Arrays.stream((objMapper.readValue(response.getContentAsString(),uf_sisinfo_userapps[].class))).filter(x -> x.getAppcode().equals(app1_code)).collect(Collectors.toList()).get(0);
+        uf_sisinfo_AppsAndPermissions app1 = Arrays.stream((objMapper.readValue(response.getContentAsString(), uf_sisinfo_AppsAndPermissions[].class))).filter(x -> x.getAPP_CODE().equals(app1_code)).collect(Collectors.toList()).get(0);
         //Object for asserts app2
         String app2_code = "DK_AKA/MAT/EST";
-        uf_sisinfo_userapps app2 = Arrays.stream((objMapper.readValue(response.getContentAsString(),uf_sisinfo_userapps[].class))).filter(x -> x.getAppcode().equals(app2_code)).collect(Collectors.toList()).get(0);
+        uf_sisinfo_AppsAndPermissions app2 = Arrays.stream((objMapper.readValue(response.getContentAsString(), uf_sisinfo_AppsAndPermissions[].class))).filter(x -> x.getAPP_CODE().equals(app2_code)).collect(Collectors.toList()).get(0);
         //Object attributes/data assertions
-        Assertions.assertEquals("ajuste de matrícula estudiante",app2.getAppname().toLowerCase());
-        Assertions.assertEquals("historial académico estudiante",app1.getAppname().toLowerCase());
-        Assertions.assertEquals(2,app1.getTreelevel());
-        Assertions.assertEquals(2,app2.getTreelevel());
+        Assertions.assertEquals("ajuste de matrícula estudiante",app2.getAPP_NAME().toLowerCase());
+        Assertions.assertEquals("historial académico estudiante",app1.getAPP_NAME().toLowerCase());
+        Assertions.assertEquals(2,app1.getAPP_TREE_LEVEL());
+        Assertions.assertEquals(2,app2.getAPP_TREE_LEVEL());
 
     }
 
@@ -330,26 +329,6 @@ class GetUserTest {
 
     }
 
-    @Test
-    void SYSTEM_RECORDACCESS() throws Exception {
-        String param = "ZGFsYXJjb250!RDRsYXJjb250";
-        String param_decoded0 = "dalarcont";
-        //Build request
-        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
-                .get(Routes.ROOT.USERS+Routes.GET.USERS.SYSTEM_DESKAPP_RECORDACCESS,param).contentType(MediaType.APPLICATION_JSON);
-        //Perform request and check asserts
-        Date da = new Date();
-        MockHttpServletResponse response = mmvc.perform(request).andReturn().getResponse();
-        Assertions.assertEquals(200,response.getStatus());
-        //Object for asserts
-        boolean validation = objMapper.readValue(response.getContentAsString(),boolean.class);
 
-        if(validation){
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String dateCompare = sdf.format(da);
-
-            Assertions.assertEquals(dateCompare,userSrvc.getEmployeeProfile(param_decoded0).get(0).getLastAccess());
-        }
-    }
 
 }

@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.ies</groupId>
 	<artifactId>ies_admin_academ</artifactId>
-	<version>3.6.23-SNAPSHOT</version>
+	<version>3.10.23-SNAPSHOT</version>
 	<name>ies_admin_academ</name>
 	<description>API REST For IES Admin and Academy Services</description>
 	<properties>
@@ -35,7 +35,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>javax.mail</artifactId>
+			<version>1.5.5</version>
+		</dependency>
 		<dependency>
 			<groupId>com.mysql</groupId>
 			<artifactId>mysql-connector-j</artifactId>
