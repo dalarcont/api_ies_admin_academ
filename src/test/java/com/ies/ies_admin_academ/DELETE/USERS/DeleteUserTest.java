@@ -31,7 +31,7 @@ public class DeleteUserTest {
 
     @Test
     void DELETE_USER_WORKS() throws Exception{
-        String usrDelete = "aalabone3h";
+        String usrDelete = "alabri";
 
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders
                 .delete(Routes.ROOT.USERS+ Routes.ROOT.BODY,usrDelete);

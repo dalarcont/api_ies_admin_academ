@@ -55,7 +55,7 @@ public class PostUserTest {
         MockHttpServletResponse response = mmvc.perform(request).andReturn().getResponse();
         Assertions.assertEquals(200,response.getStatus());
 
-        List<uf_personas> user = uRepo.getUserBasicData("jalarcont");
+        List<uf_personas> user = uRepo.getUserProfile("jalarcont");
         Assertions.assertEquals(1, user.size());
         //Validation of password for new additions due to the business rule (See UserServiceGeneral method addUser notes)
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();

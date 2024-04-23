@@ -9,18 +9,18 @@ public class uf_sisinfo_AppsAndPermissions {
     private int APP_TREE_LEVEL;
     //DB Attributes of uf_sisinfo_permisos
     private String COD_USUARIO;
-    private boolean PERMISSION;
+    private boolean APP_PERMISSION;
 
     public uf_sisinfo_AppsAndPermissions() {
     }
 
-    public uf_sisinfo_AppsAndPermissions(String APP_CODE, String APP_NAME, String APP_DESCR, int APP_TREE_LEVEL, String COD_USUARIO, boolean PERMISSION) {
+    public uf_sisinfo_AppsAndPermissions(String APP_CODE, String APP_NAME, String APP_DESCR, int APP_TREE_LEVEL, String COD_USUARIO, boolean APP_PERMISSION) {
         this.APP_CODE = APP_CODE;
         this.APP_NAME = APP_NAME;
         this.APP_DESCR = APP_DESCR;
         this.APP_TREE_LEVEL = APP_TREE_LEVEL;
         this.COD_USUARIO = COD_USUARIO;
-        this.PERMISSION = PERMISSION;
+        this.APP_PERMISSION = APP_PERMISSION;
     }
 
     public String getAPP_CODE() {
@@ -63,11 +63,11 @@ public class uf_sisinfo_AppsAndPermissions {
         this.COD_USUARIO = COD_USUARIO;
     }
 
-    public boolean getPERMISSION() {
-        return PERMISSION;
+    public boolean getAPP_PERMISSION() {
+        return APP_PERMISSION;
     }
 
-    public void setPERMISSION(boolean PERMISSION) {
-        this.PERMISSION = PERMISSION;
+    public void setAPP_PERMISSION(boolean APP_PERMISSION) {
+        this.APP_PERMISSION = APP_PERMISSION;
     }
 }

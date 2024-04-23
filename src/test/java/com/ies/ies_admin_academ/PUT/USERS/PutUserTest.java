@@ -54,7 +54,7 @@ public class PutUserTest {
         MockHttpServletResponse response = mmvc.perform(request).andReturn().getResponse();
         Assertions.assertEquals(200,response.getStatus());
 
-        List<uf_personas> user = uRepo.getUserBasicData("janistabaress");
+        List<uf_personas> user = uRepo.getUserProfile("janistabaress");
         Assertions.assertEquals(user.get(0).getPRSN_APE(),"Tabares SalgadoCHANGED");
         Assertions.assertEquals(user.get(0).getPRSN_ORIGEN_CIUDAD(),"CHANGEDPacora".toUpperCase());
         Assertions.assertEquals(user.get(0).getPRSN_RESIDE_CIUDAD(),"CHANGEDPereira".toUpperCase());

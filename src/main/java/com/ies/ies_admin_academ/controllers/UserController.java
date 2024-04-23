@@ -41,11 +41,13 @@ public class UserController {
     }
 
     //FINAL ENDPOINTS
-    //GET
+    /* /////////////////////////////////////////////////////////////////////////////////////////////////
+    /// GET ////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////// */
     @GetMapping(Routes.GET.USERS.EXISTENCEPROOF)
-    public boolean userValidateExistence(
+    public boolean userExistenceValidation(
             @PathVariable("username") String username){
-            return userServiceGeneral.validateUser(username);
+            return userServiceGeneral.userExistenceValidation(username);
     }
 
     @GetMapping(Routes.GET.USERS.GET_USER_PROFILE)
@@ -57,25 +59,25 @@ public class UserController {
     }
 
     @GetMapping(Routes.GET.USERS.GET_EMPLOYEE_PROFILE)
-    public uf_personas_empleado userGetEmployeeData(
+    public uf_personas_empleado userGetEmployeeProfile(
     //public List<uf_employee_profile> userGetEmployeeData(
             @PathVariable("data") String data){
         //Perform endpoint consumption
-        return userServiceGeneral.getEmployeeProfile(data).get(0);
+        return userServiceGeneral.userGetEmployeeProfile(data).get(0);
     }
 
     @GetMapping(Routes.GET.USERS.GET_STUDENT_PROFILE)
-    public uf_personas_estudiante userGetStudentData(
+    public uf_personas_estudiante userGetStudentProfile(
             @PathVariable("data") String data){
         //Perform endpoint consumption
-        return userServiceGeneral.getStudentProfile(data).get(0);
+        return userServiceGeneral.userGetStudentProfile(data).get(0);
     }
 
     @GetMapping(Routes.GET.USERS.MATCH_LOGIN)
-    public boolean matchLoginALL(
+    public boolean matchLogin(
             @PathVariable("data") String data){
             //Perform endpoint consumption
-            return userServiceGeneral.validateLogin(dataDecoder(data)[0],dataDecoder(data)[1]);
+            return userServiceGeneral.matchLogin(dataDecoder(data)[0],dataDecoder(data)[1]);
 
     }
 
@@ -94,51 +96,52 @@ public class UserController {
     }
 
     @GetMapping(Routes.GET.USERS.SYSINFO_PERMISSIONS)
-    public List<uf_sisinfo_AppsAndPermissions> userGetAppsPermissions(
+    public List<uf_sisinfo_AppsAndPermissions> userGetAppsAndPermissions(
             @PathVariable("data") String data){
             //Perform endpoint consumption
-            return userServiceGeneral.userGetAppsPermissions(dataDecoder(data)[0]);
+            return userServiceGeneral.userGetAppsAndPermissions(dataDecoder(data)[0]);
     }
-
-
 
     @GetMapping(Routes.GET.USERS.EXISTENCEPROOF_BYID)
-    public boolean validationById(
+    public boolean validateUserById(
             @PathVariable("data") String data) {
         //Perform endpoint consumption
-        return userServiceGeneral.validateExistenceById(data);
-    }
-
-    @GetMapping(Routes.GET.USERS.USR_ADD_VAL_USERNAME)
-    public boolean usernameValidationSignup(
-            @PathVariable("data") String data) {
-        //Perform endpoint consumption
-        return userServiceGeneral.validateUsernameExistence(data);
+        return userServiceGeneral.validateUserById(data);
     }
 
     @GetMapping(Routes.GET.USERS.USR_ADD_VAL_EMAIL)
-    public boolean emailValidationSignup(
+    public boolean validateSignupEmail(
             @PathVariable("data") String data){
         //Perform endpoint consumption
-        return userServiceGeneral.validateExistenceByEmail(data);
+        return userServiceGeneral.validateSignupEmail(data);
     }
 
-    //POST
+    /* /////////////////////////////////////////////////////////////////////////////////////////////////
+    /// POST ///////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////// */
     @PostMapping
-    public uf_personas userAddUser(@RequestBody uf_personas userdata){
+    public uf_personas addUser(@RequestBody uf_personas userdata){
         //Perform endpoint consumption
         return userServiceGeneral.addUser(userdata);
     }
 
     @PostMapping(Routes.POST.USERS.ADD_EVENT_WORKLOG)
-    public boolean addEventWorklog(@RequestBody uf_registro_ejecutivo data){
+    public boolean addEmployeeActivityLog(@RequestBody uf_registro_ejecutivo data){
         //Perform endpoint consumption
-        return userServiceGeneral.addExecutiveLog(data);
+        return userServiceGeneral.addEmployeeActivityLog(data);
     }
 
-    //PATCH
+    @PostMapping(Routes.POST.USERS.ADD_EVENT_STDNTLOG)
+    public boolean addStudentActivityLog(@RequestBody uf_estudiantes_registro_ejecutivo data){
+        //Perform endpoint consumption
+        return userServiceGeneral.addStudentActivityLog(data);
+    }
+
+    /* /////////////////////////////////////////////////////////////////////////////////////////////////
+    /// PATCH //////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////// */
     @PatchMapping(Routes.ROOT.BODY)
-    public uf_personas userPatchItem(
+    public uf_personas patchUser(
             @PathVariable String data,
             @RequestBody JsonPatch jsonPatch) throws JsonPatchException, JsonProcessingException {
         //Decode user and password
@@ -147,24 +150,37 @@ public class UserController {
     }
 
     @PatchMapping(Routes.PATCH.USERS.SYSTEM_DESKAPP_RECORDACCESS)
-    public boolean userNewAccessRecord(
+    public boolean patchUserDeskappLastAccessDate(
             @PathVariable("data") String data){
         //new date data
         String newDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime());
         //Perform endpoint consumption
-        return userServiceGeneral.setUserLastAccessDeskapp(dataDecoder(data)[0], newDate);
+        return userServiceGeneral.patchUserDeskappLastAccessDate(dataDecoder(data)[0], newDate);
     }
 
-    //PUT
+    @PatchMapping(Routes.PATCH.USERS.SYSTEM_STD_RECORDACCESS)
+    public boolean patchStudentLastAccessDate(
+            @PathVariable("data") String data){
+        //new date data
+        String newDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime());
+        //Perform endpoint consumption
+        return userServiceGeneral.patchStudentLastAccessDate(dataDecoder(data)[0], newDate);
+    }
+
+    /* /////////////////////////////////////////////////////////////////////////////////////////////////
+    /// PUT ////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////// */
     @PutMapping(Routes.ROOT.BODY)
-    public uf_personas userPutProfile(
+    public uf_personas putUserProfile(
             @PathVariable String data,
             @RequestBody uf_personas userdata){
         //Perform endpoint consumption
-        return userServiceGeneral.putUser(data,userdata);
+        return userServiceGeneral.putUserProfile(data,userdata);
     }
 
-    //DELETE
+    /* /////////////////////////////////////////////////////////////////////////////////////////////////
+    /// DELETE /////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////// */
     @DeleteMapping(Routes.ROOT.BODY)
     public boolean deleteUser(@PathVariable String data){
         //Perform endpoint consumption

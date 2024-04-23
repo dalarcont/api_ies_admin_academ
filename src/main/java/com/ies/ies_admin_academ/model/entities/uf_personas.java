@@ -32,7 +32,7 @@ public class uf_personas {
     //Custom properties created by the original properties with its codes given
     private String PRSN_GEN_NOM;
     private String PRSN_ORIGEN_PAIS_NOM;
-    private String PRSN_ORIGEN_RESIDE_NOM;
+    private String PRSN_RESIDE_PAIS_NOM;
     private String PRSN_ESCOLARIDAD_NOM;
 
     public uf_personas() {
@@ -40,7 +40,7 @@ public class uf_personas {
 
     @JsonCreator
     //@JsonPropertyOrder(value = {"PRSN_REG","PRSN_FEC_REG","PRSN_ID","PRSN_NOM","PRSN_APE","PRSN_USUARIO","PRSN_GEN","PRSN_EMAIL_PERSONAL","PRSN_EMAIL_LABORAL","PRSN_ORIGEN_PAIS","PRSN_ORIGEN_CIUDAD","PRSN_RESIDE_PAIS","PRSN_RESIDE_CIUDAD","PRSN_ESCOLARIDAD","PRSN_PKEY","PRSN_RECOVERY_QUEST","PRSN_RECOVERY_ANS"})
-    public uf_personas(int PRSN_REG, String PRSN_FEC_REG, String PRSN_ID, String PRSN_NOM, String PRSN_APE, String PRSN_USUARIO, String PRSN_GEN, String PRSN_EMAIL_PERSONAL, String PRSN_EMAIL_LABORAL, String PRSN_ORIGEN_PAIS, String PRSN_ORIGEN_CIUDAD, String PRSN_RESIDE_PAIS, String PRSN_RESIDE_CIUDAD, String PRSN_ESCOLARIDAD, String PRSN_PKEY, String PRSN_RECOVERY_QUEST, String PRSN_RECOVERY_ANS, String PRSN_GEN_NOM, String PRSN_ORIGEN_PAIS_NOM, String PRSN_ORIGEN_RESIDE_NOM, String PRSN_ESCOLARIDAD_NOM) {
+    public uf_personas(int PRSN_REG, String PRSN_FEC_REG, String PRSN_ID, String PRSN_NOM, String PRSN_APE, String PRSN_USUARIO, String PRSN_GEN, String PRSN_EMAIL_PERSONAL, String PRSN_EMAIL_LABORAL, String PRSN_ORIGEN_PAIS, String PRSN_ORIGEN_CIUDAD, String PRSN_RESIDE_PAIS, String PRSN_RESIDE_CIUDAD, String PRSN_ESCOLARIDAD, String PRSN_PKEY, String PRSN_RECOVERY_QUEST, String PRSN_RECOVERY_ANS, String PRSN_GEN_NOM, String PRSN_ORIGEN_PAIS_NOM, String PRSN_RESIDE_PAIS_NOM, String PRSN_ESCOLARIDAD_NOM) {
         this.PRSN_REG = PRSN_REG;
         this.PRSN_FEC_REG = PRSN_FEC_REG;
         this.PRSN_ID = PRSN_ID;
@@ -60,7 +60,7 @@ public class uf_personas {
         this.PRSN_RECOVERY_ANS = PRSN_RECOVERY_ANS;
         this.PRSN_GEN_NOM = PRSN_GEN_NOM;
         this.PRSN_ORIGEN_PAIS_NOM = PRSN_ORIGEN_PAIS_NOM;
-        this.PRSN_ORIGEN_RESIDE_NOM = PRSN_ORIGEN_RESIDE_NOM;
+        this.PRSN_RESIDE_PAIS_NOM = PRSN_RESIDE_PAIS_NOM;
         this.PRSN_ESCOLARIDAD_NOM = PRSN_ESCOLARIDAD_NOM;
     }
 
@@ -216,12 +216,12 @@ public class uf_personas {
         this.PRSN_ORIGEN_PAIS_NOM = PRSN_ORIGEN_PAIS_NOM;
     }
 
-    public String getPRSN_ORIGEN_RESIDE_NOM() {
-        return PRSN_ORIGEN_RESIDE_NOM;
+    public String getPRSN_RESIDE_PAIS_NOM() {
+        return PRSN_RESIDE_PAIS_NOM;
     }
 
-    public void setPRSN_ORIGEN_RESIDE_NOM(String PRSN_ORIGEN_RESIDE_NOM) {
-        this.PRSN_ORIGEN_RESIDE_NOM = PRSN_ORIGEN_RESIDE_NOM;
+    public void setPRSN_RESIDE_PAIS_NOM(String PRSN_RESIDE_PAIS_NOM) {
+        this.PRSN_RESIDE_PAIS_NOM = PRSN_RESIDE_PAIS_NOM;
     }
 
     public String getPRSN_ESCOLARIDAD_NOM() {
