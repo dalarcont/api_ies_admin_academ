@@ -21,6 +21,9 @@ public class GeneralService {
         this.objMapper = objMapper;
     }
 
+    /* /////////////////////////////////////////////////////////////////////////////////////////////////
+    /// GET ////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////// */
     /**
      * The different tables present at DDBB has its codes to refer to something
      * This endpoint performs let you know the mean of that code
@@ -28,21 +31,18 @@ public class GeneralService {
      * @param srcTable Name of table where is present
      * @return String name of convention
      */
-    public String getConventionName(String codConv,String srcTable){
-        eventLogger.log(org.apache.logging.log4j.Level.INFO, "-API\t--SERVICE\t---GET\t----GET CONVENTION NAME\t-----@{}\t@{}", codConv,srcTable);
+    public String getConventionName(String codConv){
+        eventLogger.log(org.apache.logging.log4j.Level.INFO, "-API\t--SERVICE\t---GET\t----GET CONVENTION NAME\t-----@{}", codConv);
         String r = null;
         //Check for source table parameter isn't empty
-        if(!srcTable.isEmpty()){
+        //if(!srcTable.isEmpty()){
             //Source table was specified
             //Validate convention code is given
             if(!codConv.isEmpty()){
-                String tmp = generalRepository.getConventionName(codConv,srcTable);
+                String tmp = generalRepository.getConventionName(codConv);
                 if(!tmp.contains("NULL")){
                     //There is a result
                     r = tmp;
-                }else if(tmp.contains("NULL_TABLE")){
-                    //Given source table doesn't exits
-                    throw new BusinessException(ErrorCodes.GENERAL_CONVENTION_SRCTABLE_NOTEXISTS);
                 }else{
                     //Given convention code doesn't exists
                     throw new BusinessException(ErrorCodes.GENERAL_CONVENTION_CODE_NOEXISTS);
@@ -51,10 +51,10 @@ public class GeneralService {
                 //Convention code not given
                 throw new BusinessException(ErrorCodes.GENERAL_CONVENTION_CODE_NOTGIVEN);
             }
-        }else{
+        /*}else{
             //Source table wasn't given or is incorrect
             throw new BusinessException(ErrorCodes.GENERAL_CONVENTION_SRCTABLE_NOTGIVEN);
-        }
+        }*/
 
         return r;
     }
@@ -66,7 +66,7 @@ public class GeneralService {
             //App code was given
             rs = generalRepository.getAppStatus(appcode);
             if(rs == null){
-                //Object return null from repository, so the appcode was given but is incorrect or doesn't exists
+                //Object return null from repository, so the appcode was given but is incorrect or doesn't exist
                 throw new BusinessException(ErrorCodes.GENERAL_APPCODE_NOEXISTS);
             }
         }else{
@@ -75,5 +75,26 @@ public class GeneralService {
         }
         return rs;
     }
+
+
+    /* /////////////////////////////////////////////////////////////////////////////////////////////////
+    /// POST ///////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////// */
+
+
+    /* /////////////////////////////////////////////////////////////////////////////////////////////////
+    /// PATCH //////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////// */
+
+
+    /* /////////////////////////////////////////////////////////////////////////////////////////////////
+    /// PUT ////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////// */
+
+
+    /* /////////////////////////////////////////////////////////////////////////////////////////////////
+    /// DELETE /////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////// */
+
 
 }

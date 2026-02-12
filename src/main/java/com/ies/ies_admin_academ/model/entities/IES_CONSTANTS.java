@@ -5,29 +5,31 @@ public class IES_CONSTANTS {
     public enum EMAIL_ADDRESS{
         String;
 
-        public static final String ADMISIONES = "admisiones@unifalsa.com";
-        public static final String DEV = "dev@unifalsa.com";
-        public static final String HELP = "help@unifalsa.com";
-        public static final String INSCRIPCIONES = "inscripciones@unifalsa.com";
-        public static final String JUDICIAL = "judicial@unifalsa.com";
-        public static final String MATRICULA = "matricula@unifalsa.com";
-        public static final String PRESIDENCIA = "presidencia@unifalsa.com";
-        public static final String SOPORTE = "soporte@unifalsa.com";
-        public static final String VICEPRESIDENCIA = "vicepresidencia@unifalsa.com";
+        public static final String ADMISIONES       = "admisiones@unifalsa.com";
+        public static final String DEV              = "dev@unifalsa.com";
+        public static final String HELP             = "help@unifalsa.com";
+        public static final String INSCRIPCIONES    = "inscripciones@unifalsa.com";
+        public static final String JUDICIAL         = "judicial@unifalsa.com";
+        public static final String MATRICULA        = "matricula@unifalsa.com";
+        public static final String PRESIDENCIA      = "presidencia@unifalsa.com";
+        public static final String SOPORTE          = "soporte@unifalsa.com";
+        public static final String VICEPRESIDENCIA  = "vicepresidencia@unifalsa.com";
+        public static final String NOREPLY          = "noreply@unifalsa.com";
     }
 
     public enum EMAIL_NAMES{
         String;
 
-        public static final String ADMISIONES = "Admisiones Universidad Falsa";
-        public static final String DEV = "Desarrollo Informático Universidad Falsa";
-        public static final String HELP = "Ayuda Universidad Falsa";
-        public static final String INSCRIPCIONES = "Inscripciones Universidad Falsa";
-        public static final String JUDICIAL = "Judicial Universidad Falsa";
-        public static final String MATRICULA = "Matrícula Universidad Falsa";
-        public static final String PRESIDENCIA = "Presidencia Universidad Falsa";
-        public static final String SOPORTE = "Soporte General Universidad Falsa";
-        public static final String VICEPRESIDENCIA = "Vicepresidencia Universidad Falsa";
+        public static final String ADMISIONES       = "Admisiones Universidad Falsa";
+        public static final String DEV              = "Desarrollo Informático Universidad Falsa";
+        public static final String HELP             = "Ayuda Universidad Falsa";
+        public static final String INSCRIPCIONES    = "Inscripciones Universidad Falsa";
+        public static final String JUDICIAL         = "Judicial Universidad Falsa";
+        public static final String MATRICULA        = "Matrícula Universidad Falsa";
+        public static final String PRESIDENCIA      = "Presidencia Universidad Falsa";
+        public static final String SOPORTE          = "Soporte General Universidad Falsa";
+        public static final String VICEPRESIDENCIA  = "Vicepresidencia Universidad Falsa";
+        public static final String INFO_REGISTRO    = "Información de Registro - Universidad Falsa";
 
     }
 

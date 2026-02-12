@@ -67,9 +67,10 @@ class GetUserTest {
         boolean validation = objMapper.readValue(response.getContentAsString(),boolean.class);
         Assertions.assertFalse(validation);
     }
+    ///
 
     @Test
-    void GET_USER_PROFILE_OLDERS_WORKS() throws Exception {
+    void GET_USER_PROFILE() throws Exception {
         String param = "dalarcont";
         //Build request
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders
@@ -89,7 +90,7 @@ class GetUserTest {
         Assertions.assertEquals("daniel.alarcon@unifalsa.com",validation.getPRSN_EMAIL_LABORAL());
         Assertions.assertEquals("dfalarcont@gmail.com",validation.getPRSN_EMAIL_PERSONAL());
         Assertions.assertEquals("COL",validation.getPRSN_ORIGEN_PAIS());
-        Assertions.assertEquals("PEREIRA",validation.getPRSN_ORIGEN_CIUDAD());
+        Assertions.assertEquals("NUEVA YORK",validation.getPRSN_ORIGEN_CIUDAD());
         Assertions.assertEquals("COL",validation.getPRSN_RESIDE_PAIS());
         Assertions.assertEquals("PEREIRA",validation.getPRSN_RESIDE_CIUDAD());
         Assertions.assertEquals("PROF",validation.getPRSN_ESCOLARIDAD());
@@ -104,7 +105,7 @@ class GetUserTest {
     }
 
     @Test
-    void GET_USER_PROFILE_OLDERS_FAILS() throws Exception {
+    void GET_USER_PROFILE_FAILS() throws Exception {
         String param = "empanada";
         //Build request
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders
@@ -144,8 +145,8 @@ class GetUserTest {
 
     @Test
     void GET_EMPLOYEE_PROFILE_FAILS() throws Exception {
-        //Send another user that doesn't have employee profile
-        String param = "aalabone3h";
+        //Send another user that exists but doesn't have employee profile
+        String param = "mago";
         //Build request
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders
                 .get(Routes.ROOT.USERS+Routes.GET.USERS.GET_EMPLOYEE_PROFILE,param).contentType(MediaType.APPLICATION_JSON);
@@ -181,7 +182,7 @@ class GetUserTest {
         Assertions.assertEquals("NOR",validation.getESTADO_ACADEMICO_GENERAL());
         Assertions.assertEquals(8311,validation.getCOD_ULTIMO_PROGRAMA_MATRICULADO());
         Assertions.assertTrue(validation.isPERMISO_ACCESO());
-        Assertions.assertEquals("2022-09-23 04:20:38",validation.getFEC_ULTIMO_ACCESO());
+        Assertions.assertEquals("2024-01-04 21:46:19",validation.getFEC_ULTIMO_ACCESO());
 
     }
 
@@ -192,8 +193,8 @@ class GetUserTest {
      * just do the asserts on the child class attributes
      */
     void GET_STUDENT_PROFILE_FAILS() throws Exception {
-        //Send another user that doesn't have employee profile
-        String param = "aalabone3h";
+        //Send another user that doesn't have student profile
+        String param = "mago";
         //Build request
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders
                 .get(Routes.ROOT.USERS+Routes.GET.USERS.GET_STUDENT_PROFILE,param).contentType(MediaType.APPLICATION_JSON);
@@ -249,7 +250,7 @@ class GetUserTest {
 
     @Test
     void DESKAPP_ACCESS_FAILS() throws Exception {
-        String param = "aalabone3h";
+        String param = "mago";
         //Build request
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders
                 .get(Routes.ROOT.USERS+Routes.GET.USERS.DESKAPP_ACCESS,param).contentType(MediaType.APPLICATION_JSON);
@@ -277,7 +278,7 @@ class GetUserTest {
 
     @Test
     void STUDENT_ACCESS_FAILS() throws Exception {
-        String param = "aalabone3h";
+        String param = "mago";
         //Build request
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders
                 .get(Routes.ROOT.USERS+Routes.GET.USERS.STUDENT_ACCESS,param).contentType(MediaType.APPLICATION_JSON);
@@ -316,7 +317,7 @@ class GetUserTest {
 
     @Test
     void SYSINFO_PERMISSIONS_FAILS() throws Exception {
-        String param = "YWFsYWJvbmUzaA==!Y29udHJhc2VuYQ==";
+        String param = "bWFnbw==!bWFnbw==";
         //Build request
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders
                 .get(Routes.ROOT.USERS+Routes.GET.USERS.SYSINFO_PERMISSIONS,param).contentType(MediaType.APPLICATION_JSON);
@@ -329,6 +330,60 @@ class GetUserTest {
 
     }
 
+    @Test
+    void EXISTENCEPROOF_BYID() throws Exception{
+        String param = "meh";
+        //Build request
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .get(Routes.ROOT.USERS+Routes.GET.USERS.EXISTENCEPROOF_BYID,param).contentType(MediaType.APPLICATION_JSON);
+        //Perform request and check asserts
+        MockHttpServletResponse response = mmvc.perform(request).andReturn().getResponse();
+        Assertions.assertEquals(200,response.getStatus());
+        //Object for asserts
+        boolean validation = objMapper.readValue(response.getContentAsString(),boolean.class);
+        Assertions.assertFalse(validation);
+    }
 
+    @Test
+    void EXISTENCEPROOF_BYID_FAILS() throws Exception{
+        String param = "1088333702";
+        //Build request
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .get(Routes.ROOT.USERS+Routes.GET.USERS.EXISTENCEPROOF_BYID,param).contentType(MediaType.APPLICATION_JSON);
+        //Perform request and check asserts
+        MockHttpServletResponse response = mmvc.perform(request).andReturn().getResponse();
+        Assertions.assertEquals(200,response.getStatus());
+        //Object for asserts
+        boolean validation = objMapper.readValue(response.getContentAsString(),boolean.class);
+        Assertions.assertTrue(validation);
+    }
+
+    @Test
+    void USR_ADD_VAL_EMAIL() throws Exception{
+        String param = "meh@meh.com";
+        //Build request
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .get(Routes.ROOT.USERS+Routes.GET.USERS.USR_ADD_VAL_EMAIL,param).contentType(MediaType.APPLICATION_JSON);
+        //Perform request and check asserts
+        MockHttpServletResponse response = mmvc.perform(request).andReturn().getResponse();
+        Assertions.assertEquals(200,response.getStatus());
+        //Object for asserts
+        boolean validation = objMapper.readValue(response.getContentAsString(),boolean.class);
+        Assertions.assertFalse(validation);
+    }
+
+    @Test
+    void USR_ADD_VAL_EMAIL_FAILS() throws Exception{
+        String param = "dfalarcont@gmail.com";
+        //Build request
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .get(Routes.ROOT.USERS+Routes.GET.USERS.USR_ADD_VAL_EMAIL,param).contentType(MediaType.APPLICATION_JSON);
+        //Perform request and check asserts
+        MockHttpServletResponse response = mmvc.perform(request).andReturn().getResponse();
+        Assertions.assertEquals(200,response.getStatus());
+        //Object for asserts
+        boolean validation = objMapper.readValue(response.getContentAsString(),boolean.class);
+        Assertions.assertTrue(validation);
+    }
 
 }

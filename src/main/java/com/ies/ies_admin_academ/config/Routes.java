@@ -32,8 +32,6 @@ public class Routes {
             public static final String SYSINFO_PERMISSIONS = "/{data}/sysinfopermissions";
             //Validation of existence of a username by its identification
             public static final String EXISTENCEPROOF_BYID = "/valbyid/{data}";
-            //Validation of availability of a username
-            public static final String USR_ADD_VAL_USERNAME = "/valaddusrname/{data}";
             //Validation of existence of a user by email
             public static final String USR_ADD_VAL_EMAIL = "/valaddemail/{data}";
 
@@ -74,5 +72,25 @@ public class Routes {
             //Add event log inside student environment
             public static final String ADD_EVENT_STDNTLOG = "/stdntlog";
         }
+    }
+
+    public enum PUT{
+        String;
+        /*
+        * INFORMATION: Due to Spring tools, isn't necessary to specify an endpoint path for this type method
+        * on the majority of the endpoint controllers.
+        * Just need to add '/{data}' as endpoint path in the controller.
+        * (See endpoint PUT userPutProfile for reference)
+        * */
+    }
+
+    public enum DELETE{
+        String;
+        /*
+         * INFORMATION: Due to Spring tools, isn't necessary to specify an endpoint path for this type method
+         * on the majority of the endpoint controllers.
+         * Just need to add '/{data}' as endpoint path in the controller.
+         * (See endpoint PUT userPutProfile for reference)
+         * */
     }
 }
